@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.app.DatePickerDialog
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.ProxyFileDescriptorCallback
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -25,7 +24,13 @@ import com.example.basiccomponents.databinding.ActivityMainBinding
 import com.example.basiccomponents.extensions.alphaFade
 import com.example.basiccomponents.network.repo.NasaRepository
 import com.example.basiccomponents.ui.models.NasaDailyImage
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import java.util.*
 
@@ -153,7 +158,11 @@ class MainActivity : AppCompatActivity() {
     private fun handleError(throwable: Throwable) {
         Log.e("MainActivity_TAG", "handleError()")
 
-        Log.e(MainActivity::class.java.simpleName, "exception! CurrentThread: ${Thread.currentThread().name}", throwable)
+        Log.e(
+            MainActivity::class.java.simpleName,
+            "exception! CurrentThread: ${Thread.currentThread().name}",
+            throwable
+        )
         runOnUiThread {
             showNetworkError(true)
             showLoading(false)
@@ -166,11 +175,11 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.toolbar_menu, menu)
         val item = menu.findItem(R.id.theme_switch)
         item.setActionView(R.layout.switch_item)
-        val mySwitch: SwitchCompat = item.actionView.findViewById(R.id.switchCompat)
+        val mySwitch: SwitchCompat? = item.actionView?.findViewById(R.id.switchCompat)
         val isNightMode = AppCompatDelegate.MODE_NIGHT_YES == AppCompatDelegate.getDefaultNightMode()
-        mySwitch.isChecked = isNightMode
+        mySwitch?.isChecked = isNightMode
 
-        mySwitch.setOnCheckedChangeListener { _, _ ->
+        mySwitch?.setOnCheckedChangeListener { _, _ ->
             changeTheme()
         }
         return super.onCreateOptionsMenu(menu)
